@@ -1,0 +1,18 @@
+# Sarack upstream input lock
+# Values in this file are consumed by .github/workflows/build.yml.
+
+SARASA_MONOJ_VERSION=1.0.41
+SARASA_MONOJ_URL=https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.41/SarasaMonoJ-TTF-Unhinted-1.0.41.7z
+SARASA_MONOJ_SHA256=174964dc5f3b930ba287300ff6776b50b0fd877ebabb9dd64ccde5a01be41cf8
+
+SARASA_TERMJ_VERSION=1.0.41
+SARASA_TERMJ_URL=https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.41/SarasaTermJ-TTF-Unhinted-1.0.41.7z
+SARASA_TERMJ_SHA256=a3612809d255828387e4cdb025b6dfabe237262bb238ab5f68baeb509400441f
+
+HACK_VERSION=3.003
+HACK_COMMIT=b47d21f808fbf4784565feccde2213ef2af924b3
+HACK_BASE_URL=https://raw.githubusercontent.com/source-foundry/Hack/b47d21f808fbf4784565feccde2213ef2af924b3/build/ttf
+HACK_REGULAR_SHA256=15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125
+HACK_BOLD_SHA256=5bbf531eff7f8a0c2559c9a0656718e2828a012a9b1f60b5f54006d59a4de8d4
+HACK_ITALIC_SHA256=096fb67a2b85f3c866e9cb3e965b27c2c10b977315f4d3d7f095674be35091c1
+HACK_BOLDITALIC_SHA256=64f74a079700b7dfe128551a1e28875d5ba980971e55f5e0f0596e37bdc6a6bc

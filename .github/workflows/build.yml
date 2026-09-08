@@ -1,0 +1,231 @@
+name: Build Sarack
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "build.py"
+      - "requirements.txt"
+      - "sources.lock"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "build.py"
+      - "requirements.txt"
+      - "sources.lock"
+      - ".github/workflows/build.yml"
+
+permissions:
+  contents: read
+
+env:
+  SARACK_VERSION: 0.1.0-dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install 7-Zip
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+
+      - name: Fetch and verify pinned upstream font inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          source sources.lock
+          mkdir -p \
+            .build/downloads \
+            .build/sarasa/mono \
+            .build/sarasa/term \
+            .build/hack \
+            .build/out/mono \
+            .build/out/term
+
+          mono_archive=".build/downloads/SarasaMonoJ-TTF-Unhinted-${SARASA_MONOJ_VERSION}.7z"
+          curl --fail --location --retry 3 \
+            --output "$mono_archive" \
+            "$SARASA_MONOJ_URL"
+          echo "${SARASA_MONOJ_SHA256}  ${mono_archive}" | sha256sum --check --strict
+          7z x -y "$mono_archive" -o.build/sarasa/mono
+
+          term_archive=".build/downloads/SarasaTermJ-TTF-Unhinted-${SARASA_TERMJ_VERSION}.7z"
+          curl --fail --location --retry 3 \
+            --output "$term_archive" \
+            "$SARASA_TERMJ_URL"
+          echo "${SARASA_TERMJ_SHA256}  ${term_archive}" | sha256sum --check --strict
+          7z x -y "$term_archive" -o.build/sarasa/term
+
+          for style in Regular Bold Italic BoldItalic; do
+            file=".build/hack/Hack-${style}.ttf"
+            curl --fail --location --retry 3 \
+              --output "$file" \
+              "${HACK_BASE_URL}/Hack-${style}.ttf"
+
+            case "$style" in
+              Regular) expected="$HACK_REGULAR_SHA256" ;;
+              Bold) expected="$HACK_BOLD_SHA256" ;;
+              Italic) expected="$HACK_ITALIC_SHA256" ;;
+              BoldItalic) expected="$HACK_BOLDITALIC_SHA256" ;;
+            esac
+            actual="$(sha256sum "$file" | awk '{print $1}')"
+            if [[ -z "$expected" || "$actual" != "$expected" ]]; then
+              echo "SHA-256 mismatch for Hack-${style}.ttf" >&2
+              echo "expected: $expected" >&2
+              echo "actual:   $actual" >&2
+              exit 1
+            fi
+            echo "Hack-${style}.ttf: SHA-256 OK"
+          done
+
+      - name: Locate Sarasa styles
+        id: sarasa
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          locate_style() {
+            local root="$1"
+            local filename="$2"
+            local output_name="$3"
+            local path
+            path="$(find "$root" -type f -name "$filename" -print -quit)"
+            test -n "$path"
+            echo "${output_name}=${path}" >> "$GITHUB_OUTPUT"
+          }
+
+          locate_style .build/sarasa/mono SarasaMonoJ-Regular.ttf mono_regular
+          locate_style .build/sarasa/mono SarasaMonoJ-Bold.ttf mono_bold
+          locate_style .build/sarasa/mono SarasaMonoJ-Italic.ttf mono_italic
+          locate_style .build/sarasa/mono SarasaMonoJ-BoldItalic.ttf mono_bolditalic
+
+          locate_style .build/sarasa/term SarasaTermJ-Regular.ttf term_regular
+          locate_style .build/sarasa/term SarasaTermJ-Bold.ttf term_bold
+          locate_style .build/sarasa/term SarasaTermJ-Italic.ttf term_italic
+          locate_style .build/sarasa/term SarasaTermJ-BoldItalic.ttf term_bolditalic
+
+      - name: Build Mono variants
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          build_pair() {
+            local sarasa="$1"
+            local hack="$2"
+            local style="$3"
+            local file_style="$4"
+
+            python build.py \
+              --sarasa "$sarasa" \
+              --hack "$hack" \
+              --style "$style" \
+              --version "$SARACK_VERSION" \
+              --output ".build/out/mono/SarackMono-${file_style}.ttf"
+
+            python build.py \
+              --sarasa "$sarasa" \
+              --hack "$hack" \
+              --style "$style" \
+              --version "$SARACK_VERSION" \
+              --hidden-space \
+              --output ".build/out/mono/SarackMonoHS-${file_style}.ttf"
+          }
+
+          build_pair "${{ steps.sarasa.outputs.mono_regular }}" .build/hack/Hack-Regular.ttf Regular Regular
+          build_pair "${{ steps.sarasa.outputs.mono_bold }}" .build/hack/Hack-Bold.ttf Bold Bold
+          build_pair "${{ steps.sarasa.outputs.mono_italic }}" .build/hack/Hack-Italic.ttf Italic Italic
+          build_pair "${{ steps.sarasa.outputs.mono_bolditalic }}" .build/hack/Hack-BoldItalic.ttf "Bold Italic" BoldItalic
+
+          test "$(find .build/out/mono -maxdepth 1 -type f -name '*.ttf' | wc -l)" -eq 8
+
+      - name: Build Term variants
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          build_pair() {
+            local sarasa="$1"
+            local hack="$2"
+            local style="$3"
+            local file_style="$4"
+
+            python build.py \
+              --sarasa "$sarasa" \
+              --hack "$hack" \
+              --style "$style" \
+              --family "Sarack Term" \
+              --version "$SARACK_VERSION" \
+              --output ".build/out/term/SarackTerm-${file_style}.ttf"
+
+            python build.py \
+              --sarasa "$sarasa" \
+              --hack "$hack" \
+              --style "$style" \
+              --family "Sarack Term HS" \
+              --version "$SARACK_VERSION" \
+              --hidden-space \
+              --output ".build/out/term/SarackTermHS-${file_style}.ttf"
+          }
+
+          build_pair "${{ steps.sarasa.outputs.term_regular }}" .build/hack/Hack-Regular.ttf Regular Regular
+          build_pair "${{ steps.sarasa.outputs.term_bold }}" .build/hack/Hack-Bold.ttf Bold Bold
+          build_pair "${{ steps.sarasa.outputs.term_italic }}" .build/hack/Hack-Italic.ttf Italic Italic
+          build_pair "${{ steps.sarasa.outputs.term_bolditalic }}" .build/hack/Hack-BoldItalic.ttf "Bold Italic" BoldItalic
+
+          test "$(find .build/out/term -maxdepth 1 -type f -name '*.ttf' | wc -l)" -eq 8
+
+      - name: Validate Term width semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from fontTools.ttLib import TTFont
+
+          def advance(path: str, codepoint: int) -> int:
+              font = TTFont(path, recalcBBoxes=False, recalcTimestamp=False)
+              cmap = font.getBestCmap()
+              if cmap is None or codepoint not in cmap:
+                  raise RuntimeError(f"U+{codepoint:04X} missing from {path}")
+              return font["hmtx"].metrics[cmap[codepoint]][0]
+
+          em_dash = 0x2014
+          mono = advance(".build/out/mono/SarackMono-Regular.ttf", em_dash)
+          term = advance(".build/out/term/SarackTerm-Regular.ttf", em_dash)
+          if mono != 1000:
+              raise RuntimeError(f"Mono U+2014 width changed: {mono} != 1000")
+          if term != 500:
+              raise RuntimeError(f"Term U+2014 width mismatch: {term} != 500")
+          print(f"U+2014 widths: mono={mono}, term={term}")
+          PY
+
+      - name: Upload Mono build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sarack-mono-dev
+          path: .build/out/mono/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Term build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sarack-term-dev
+          path: .build/out/term/
+          if-no-files-found: error
+          retention-days: 14
