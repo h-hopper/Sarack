@@ -14,8 +14,6 @@
 
 日本語ブランド名の **「紗絡」** は、異なる書体を「紗」のように織り、「絡」めて一つにするイメージから付けた造語です。`Sarack` という名称も、主要な書体ソースである Sarasa Gothic と Hack に由来します。
 
-> 初回リリースは **v0.1.0（Pre-release）** を予定しています。4ファミリー × 4スタイル、計16本の **Unhinted TTF** が対象です。
-
 ## 特徴
 
 - **日本語/CJK:** Sarasa Gothic系のシャープな字形を維持
@@ -51,7 +49,7 @@
 
 ## 入手
 
-公開後の配布先は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) です。初回の `v0.1.0` は安定版ではなく **Pre-release** として提供する予定です。
+配布物の入手先は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) です。`v0.1.0` は **Pre-release** で、4ファミリー × 4スタイル、計16本の **Unhinted TTF** を収録します。
 
 - `Sarack-Mono-v0.1.0.zip` — Mono / Mono HS 各4スタイル（8 TTF）
 - `Sarack-Term-v0.1.0.zip` — Term / Term HS 各4スタイル（8 TTF）
@@ -71,7 +69,7 @@ GitHub Actionsの開発用artifact（`0.1.0-dev`）は配布用Release package�
 - **Sarasa Term J 1.0.41 Unhinted TTF** — Term版の日本語/CJK字形、基本メトリクス、OpenType table のベース
 - **Hack 3.003** — Basic Latin 字形
 
-初回 public release は **Unhinted** を標準とします。Regularで `ttfautohint 1.8.4` を用いたA/B評価では、12～13 pxで僅かな改善は見られたものの14 px以上では差が小さく、配布サイズ増加との釣り合いから採用を見送りました。評価結果と判断理由は [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) に記録しています。
+`v0.1.0` の配布TTFは **Unhinted** です。Regularで `ttfautohint 1.8.4` を用いたA/B評価では、12～13 pxで僅かな改善は見られたものの14 px以上では差が小さく、配布サイズ増加との釣り合いから採用を見送りました。評価結果と判断理由は [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) に記録しています。
 
 標準Mono版は既定動作で `Sarack Mono` を生成し、`--hidden-space` を指定すると `Sarack Mono HS` を生成します。Term版はSarasa Term Jをbaseにし、family名を `Sarack Term` / `Sarack Term HS` として生成します。ローカルでの再生成手順、対応スタイル、GitHub Actions の動作は [ビルド手順](https://github.com/h-hopper/Sarack/blob/main/docs/BUILD.md) を参照してください。
 

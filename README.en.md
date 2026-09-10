@@ -13,8 +13,6 @@
 
 The Japanese brand name **紗絡** is a coined name expressing the idea of weaving and combining different typefaces. `Sarack` is also derived from the project's two main typeface sources: Sarasa Gothic and Hack.
 
-> The initial release is planned as **v0.1.0 (Pre-release)**: four families with four styles each, for a total of 16 **Unhinted TTFs**.
-
 ## Features
 
 - **Japanese/CJK:** retains the sharp Sarasa Gothic-family glyph design
@@ -50,7 +48,7 @@ When using `Sarack Term` / `Sarack Term HS` in PuTTY, set **Window > Translation
 
 ## Availability
 
-Packages will be available on [GitHub Releases](https://github.com/h-hopper/Sarack/releases) after publication. The initial `v0.1.0` is planned as a **Pre-release**, not a stable release.
+Release packages are distributed through [GitHub Releases](https://github.com/h-hopper/Sarack/releases). `v0.1.0` is a **Pre-release** containing four families with four styles each, for a total of 16 **Unhinted TTFs**.
 
 - `Sarack-Mono-v0.1.0.zip` — four styles each for Mono / Mono HS (8 TTFs)
 - `Sarack-Term-v0.1.0.zip` — four styles each for Term / Term HS (8 TTFs)
@@ -70,7 +68,7 @@ Primary inputs:
 - **Sarasa Term J 1.0.41 Unhinted TTF** — Japanese/CJK outlines, base metrics, and OpenType tables for the Term families
 - **Hack 3.003** — Basic Latin outlines
 
-The first public release will use **Unhinted** TTFs. A Regular-only A/B evaluation with `ttfautohint 1.8.4` showed only a slight improvement at 12–13 px and little practical difference at 14 px and above, while increasing file size substantially. The evaluation result and rationale are recorded in [DESIGN.md](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md).
+The `v0.1.0` release TTFs are **Unhinted**. A Regular-only A/B evaluation with `ttfautohint 1.8.4` showed only a slight improvement at 12–13 px and little practical difference at 14 px and above, while increasing file size substantially. The evaluation result and rationale are recorded in [DESIGN.md](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md).
 
 The default build produces `Sarack Mono`; passing `--hidden-space` produces `Sarack Mono HS`. Term builds use Sarasa Term J as the base and explicit `Sarack Term` / `Sarack Term HS` family names. See [BUILD.md](https://github.com/h-hopper/Sarack/blob/main/docs/BUILD.md) for local reproduction, supported styles, and CI details.
 
