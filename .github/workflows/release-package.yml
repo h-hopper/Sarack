@@ -27,6 +27,10 @@ permissions:
 env:
   SARACK_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.0' }}
 
+concurrency:
+  group: release-package-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -192,9 +196,10 @@ jobs:
           unzip -Z1 "Sarack-Term-v${SARACK_VERSION}.zip"
 
       - name: Upload release candidate package
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sarack-release-${{ env.SARACK_VERSION }}
           path: .build/release/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3
