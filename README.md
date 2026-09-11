@@ -7,7 +7,7 @@
 
 [![Build](https://github.com/h-hopper/Sarack/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/h-hopper/Sarack/actions/workflows/build.yml)
 <!-- 初回 GitHub Release 公開後に有効化
-[![Latest Release](https://img.shields.io/github/v/release/h-hopper/Sarack?include_prereleases)](https://github.com/h-hopper/Sarack/releases)
+[![Latest Release](https://img.shields.io/github/v/release/h-hopper/Sarack)](https://github.com/h-hopper/Sarack/releases)
 -->
 [![Font License: OFL-1.1](https://img.shields.io/badge/font%20license-OFL--1.1-blue.svg)](LICENSE-FONT)
 [![Code License: MIT](https://img.shields.io/badge/code%20license-MIT-blue.svg)](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
@@ -49,7 +49,7 @@
 
 ## 入手
 
-配布物の入手先は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) です。`v0.1.0` は **Pre-release** で、4ファミリー × 4スタイル、計16本の **Unhinted TTF** を収録します。
+配布物の入手先は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) です。`v0.1.0` は初回正式Releaseで、4ファミリー × 4スタイル、計16本の **Unhinted TTF** を収録します。
 
 - `Sarack-Mono-v0.1.0.zip` — Mono / Mono HS 各4スタイル（8 TTF）
 - `Sarack-Term-v0.1.0.zip` — Term / Term HS 各4スタイル（8 TTF）

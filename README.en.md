@@ -6,7 +6,7 @@
 
 [![Build](https://github.com/h-hopper/Sarack/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/h-hopper/Sarack/actions/workflows/build.yml)
 <!-- Enable after the first GitHub Release is published
-[![Latest Release](https://img.shields.io/github/v/release/h-hopper/Sarack?include_prereleases)](https://github.com/h-hopper/Sarack/releases)
+[![Latest Release](https://img.shields.io/github/v/release/h-hopper/Sarack)](https://github.com/h-hopper/Sarack/releases)
 -->
 [![Font License: OFL-1.1](https://img.shields.io/badge/font%20license-OFL--1.1-blue.svg)](LICENSE-FONT)
 [![Code License: MIT](https://img.shields.io/badge/code%20license-MIT-blue.svg)](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
@@ -48,7 +48,7 @@ When using `Sarack Term` / `Sarack Term HS` in PuTTY, set **Window > Translation
 
 ## Availability
 
-Release packages are distributed through [GitHub Releases](https://github.com/h-hopper/Sarack/releases). `v0.1.0` is a **Pre-release** containing four families with four styles each, for a total of 16 **Unhinted TTFs**.
+Release packages are distributed through [GitHub Releases](https://github.com/h-hopper/Sarack/releases). `v0.1.0` is the first official release and contains four families with four styles each, for a total of 16 **Unhinted TTFs**.
 
 - `Sarack-Mono-v0.1.0.zip` — four styles each for Mono / Mono HS (8 TTFs)
 - `Sarack-Term-v0.1.0.zip` — four styles each for Term / Term HS (8 TTFs)
