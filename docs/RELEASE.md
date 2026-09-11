@@ -1,6 +1,6 @@
 # 紗絡 / Sarack 公開・Release チェックリスト
 
-この文書は、Sarack の公開用treeとGitHub Release配布物の確認事項をまとめます。公開先は `h-hopper/Sarack`、初回versionは `v0.1.0`（Pre-release）です。
+この文書は、Sarack の公開用treeとGitHub Release配布物の確認事項をまとめます。公開先は `h-hopper/Sarack`、初回公開versionは `v0.1.0` です。公開前Release gateをすべて通過した後、正式な通常GitHub Releaseとして公開します。
 
 ## 1. 名称・metadata
 
@@ -109,10 +109,10 @@ Binary-onlyのMono / Term配布ZIPにはproject-authored source/build toolingを
 - Font License: OFL-1.1
 - Code License: MIT
 
-初回 Release 後:
+初回正式Release後:
 
 - README 冒頭にコメントアウト済みの `Latest Release` badge を有効化する
-- 初回はPre-releaseのため、badgeに `include_prereleases` を指定し、リンク先は `https://github.com/h-hopper/Sarack/releases` とする（`releases/latest` は安定版向け）
+- badgeは通常Releaseのみを表示し、Pre-releaseは表示対象に含めない。リンク先は `https://github.com/h-hopper/Sarack/releases` とする
 
 原則として追加しない:
 
@@ -121,23 +121,28 @@ Binary-onlyのMono / Term配布ZIPにはproject-authored source/build toolingを
 
 ## 8. 公開repositoryへの移行
 
-公開先は新しい `h-hopper/Sarack` repositoryとし、監査済み完成treeのみを **1 root commit** として投入する。旧Private開発repositoryの履歴・PR・評価branch・Actions履歴は移行しない。
+公開先の `h-hopper/Sarack` は、旧Private開発repositoryとは独立した新repositoryである。初期importでは、監査済みbaselineを独立したroot commitとして作成済みであり、旧 `Sarack-Code` のcommit ancestry・PR・branch・Actions履歴は移行していない。
+
+初期baseline後の公開準備変更は、通常のreviewed PR / commitとして積み上げてよい。Public化時点で複数commitが存在してよく、history rewriteで1 commitへ戻す必要はない。目的は旧repositoryとの履歴分離であり、Public化まで単一commitを維持することではない。
 
 公開用treeの準備と、repository作成・初期commit投入・Public化・tag / Release公開は別工程として扱う。tree準備だけでは後者を実行しない。旧repositoryのarchive・削除も別途判断する。
 
-移行時には以下を確認する。
+Public化前には以下を確認する。
 
 - 移植するtracked treeにsecret / token / 不要な個人情報・ローカルパス・生成物が含まれていない
-- 旧repositoryの `.git` をコピーせず、新repositoryが単一root commitから始まる
+- 初期importで旧repositoryの `.git` をコピーせず、baselineが独立したroot commitとして作成されている
+- baseline後の公開準備変更がreview済みの通常commitとして記録され、旧repositoryのcommit ancestryが混入していない
 - README / license / workflow がPublic前提で読める
 - repository名・README内URL・badge・Release導線が最終公開先と一致する
-- 公開先URLはtree準備時点で設定するため、新repository作成前のリンクやBuild badgeは一時的に利用できない。workflow自体はrepository名に依存しない
+- Public化前はrepositoryがPrivateであるため、README内リンクやBuild badgeの外部表示はPublic化後に確認する。workflow自体はrepository名に依存しない
 - GitHub Secrets・Actions設定・権限・branch protectionはtreeと別に確認する。旧repositoryの設定が自動移行するとは扱わない
 - 新repositoryで `build.yml` と `release-package.yml`（version `0.1.0`）を実行し、CIと生成artifactを確認してからPublic化する
 
 ## 9. GitHub Release
 
-初回公開versionは **`v0.1.0`** とし、GitHub Release上では **Pre-release** として公開する。
+初回公開versionは **`v0.1.0`** とし、GitHub Release上では正式な **通常Release** として公開する。Pre-release設定は **OFF** とする。
+
+Pre-releaseは、将来、外部検証が必要なRC / beta等に限定して使用する（例: `v0.2.0-rc.1`）。RC / beta等をPre-releaseとして公開した場合、正式版は別tag（例: `v0.2.0`）として作成し、同一tagをPre-releaseから通常Releaseへ昇格させる運用は原則行わない。`v0.x` であること自体はGitHub Pre-releaseと同義ではない。
 
 正式配布候補は `.github/workflows/release-package.yml` で `0.1.0` を指定して生成し、Release assetは次を基本構成とする。
 
