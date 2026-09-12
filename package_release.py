@@ -45,12 +45,16 @@ COMMON_FILES = (
     Path("LICENSES/Hack-LICENSE.md"),
 )
 
-EXPECTED_FAMILIES = {
-    "SarackMono-": "Sarack Mono",
-    "SarackMonoHS-": "Sarack Mono HS",
-    "SarackTerm-": "Sarack Term",
-    "SarackTermHS-": "Sarack Term HS",
+EXPECTED_FONT_PROPERTIES = {
+    "SarackMono-": ("Sarack Mono", 1000),
+    "SarackMonoHS-": ("Sarack Mono HS", 1000),
+    "SarackTerm-": ("Sarack Term", 500),
+    "SarackTermHS-": ("Sarack Term HS", 500),
 }
+
+EXPECTED_HALF_WIDTH = 500
+EXPECTED_FULL_WIDTH = 1000
+UNHINTED_TABLES = ("cvt ", "fpgm", "prep")
 
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
@@ -81,16 +85,16 @@ def get_name(font: TTFont, name_id: int) -> str | None:
     return None
 
 
-def expected_family(filename: str) -> str:
-    for prefix, family in EXPECTED_FAMILIES.items():
+def expected_font_properties(filename: str) -> tuple[str, int]:
+    for prefix, properties in EXPECTED_FONT_PROPERTIES.items():
         if filename.startswith(prefix):
-            return family
+            return properties
     raise RuntimeError(f"Unknown Sarack release filename: {filename}")
 
 
 def validate_font(path: Path, version: str) -> None:
     font = TTFont(path, recalcBBoxes=False, recalcTimestamp=False)
-    family = expected_family(path.name)
+    family, expected_em_dash_width = expected_font_properties(path.name)
     if get_name(font, 1) != family or get_name(font, 16) != family:
         raise RuntimeError(f"Family metadata mismatch: {path.name}")
     if get_name(font, 5) != f"Version {version}":
@@ -99,6 +103,54 @@ def validate_font(path: Path, version: str) -> None:
         raise RuntimeError(f"License metadata mismatch: {path.name}")
     if get_name(font, 14) != "https://openfontlicense.org":
         raise RuntimeError(f"License URL metadata mismatch: {path.name}")
+
+    cmap = font.getBestCmap()
+    required_codepoints = (0x30, 0x3042, 0x3000, 0x2014)
+    if cmap is None or any(codepoint not in cmap for codepoint in required_codepoints):
+        missing = [
+            f"U+{codepoint:04X}"
+            for codepoint in required_codepoints
+            if cmap is None or codepoint not in cmap
+        ]
+        raise RuntimeError(
+            f"Required release glyphs missing from {path.name}: {', '.join(missing)}"
+        )
+
+    hmtx = font["hmtx"].metrics
+    half_width = hmtx[cmap[0x30]][0]
+    full_width = hmtx[cmap[0x3042]][0]
+    u3000_width = hmtx[cmap[0x3000]][0]
+    em_dash_width = hmtx[cmap[0x2014]][0]
+    if half_width != EXPECTED_HALF_WIDTH:
+        raise RuntimeError(
+            f"Half width mismatch in {path.name}: {half_width} != {EXPECTED_HALF_WIDTH}"
+        )
+    if full_width != EXPECTED_FULL_WIDTH:
+        raise RuntimeError(
+            f"Full width mismatch in {path.name}: {full_width} != {EXPECTED_FULL_WIDTH}"
+        )
+    if u3000_width != EXPECTED_FULL_WIDTH:
+        raise RuntimeError(
+            f"U+3000 width mismatch in {path.name}: {u3000_width} != {EXPECTED_FULL_WIDTH}"
+        )
+    if em_dash_width != expected_em_dash_width:
+        raise RuntimeError(
+            f"U+2014 width mismatch in {path.name}: "
+            f"{em_dash_width} != {expected_em_dash_width}"
+        )
+
+    present_hinting_tables = [tag for tag in UNHINTED_TABLES if tag in font]
+    if present_hinting_tables:
+        raise RuntimeError(
+            f"Unhinted validation failed for {path.name}; unexpected tables: "
+            + ", ".join(repr(tag) for tag in present_hinting_tables)
+        )
+
+    print(
+        f"Validated {path.name}: half/full={half_width}/{full_width}, "
+        f"U+3000={u3000_width}, U+2014={em_dash_width}, "
+        "Unhinted tables absent"
+    )
 
 
 def require_inputs(directory: Path, filenames: tuple[str, ...], version: str) -> list[Path]:

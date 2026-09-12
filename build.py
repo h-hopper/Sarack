@@ -40,6 +40,10 @@ QUOTE_SCALE = 1.10
 PUNCT_SCALE = 1.08
 IDEOGRAPHIC_SPACE_DOT_SIZE = 60
 
+EXPECTED_HALF_WIDTH = 500
+EXPECTED_FULL_WIDTH = 1000
+UNHINTED_TABLES = ("cvt ", "fpgm", "prep")
+
 QUOTE_CODEPOINTS = (0x22, 0x27, 0x60)
 PUNCT_CODEPOINTS = (0x2E, 0x2C, 0x3A, 0x3B)
 HACKGEN_PUNCT_Y_SHIFT = {
@@ -412,13 +416,31 @@ def validate(
     hmtx = font["hmtx"].metrics
     half = hmtx[cmap[0x30]][0]
     full = hmtx[cmap[0x3042]][0]
+    if half != EXPECTED_HALF_WIDTH:
+        raise RuntimeError(
+            f"Half width validation failed: {half} != {EXPECTED_HALF_WIDTH}"
+        )
+    if full != EXPECTED_FULL_WIDTH:
+        raise RuntimeError(
+            f"Full width validation failed: {full} != {EXPECTED_FULL_WIDTH}"
+        )
     if full != half * 2:
         raise RuntimeError(f"1:2 validation failed: half={half}, full={full}")
     for cp in range(0x20, 0x7F):
         if hmtx[cmap[cp]][0] != half:
             raise RuntimeError(f"ASCII width mismatch at U+{cp:04X}")
-    if hmtx[cmap[0x3000]][0] != full:
-        raise RuntimeError("U+3000 width mismatch")
+    u3000_width = hmtx[cmap[0x3000]][0]
+    if u3000_width != EXPECTED_FULL_WIDTH:
+        raise RuntimeError(
+            f"U+3000 width validation failed: {u3000_width} != {EXPECTED_FULL_WIDTH}"
+        )
+
+    present_hinting_tables = [tag for tag in UNHINTED_TABLES if tag in font]
+    if present_hinting_tables:
+        raise RuntimeError(
+            "Unhinted validation failed; unexpected TrueType hinting tables: "
+            + ", ".join(repr(tag) for tag in present_hinting_tables)
+        )
 
     u3000_has_ink = glyph_bounds(font, cmap[0x3000]) is not None
     if u3000_has_ink != visible_ideographic_space:
