@@ -66,6 +66,8 @@
 
 ## 5. ライセンス・第三者通知
 
+`LICENSE-CODE` は、このリポジトリで独自に作成したコード・ツール（ビルド・パッケージングツール等）に適用するMIT Licenseである。`LICENSE-FONT` は、生成されるSarackフォントに適用するSIL Open Font License 1.1である。MITは生成フォントには適用せず、上流フォントソフトウェアをMITへ再ライセンスするものではない。
+
 Release archive に少なくとも次を含める。
 
 - `LICENSE-FONT`

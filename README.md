@@ -95,7 +95,9 @@ GitHub Actionsの開発用artifact（`0.1.0-dev`）は配布用Release package�
 コンポーネントごとにライセンスを分けています。
 
 - **生成される Sarack フォント:** [SIL Open Font License 1.1](LICENSE-FONT)
-- **このプロジェクト独自のビルドツール:** [MIT License](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
+- **このリポジトリの独自コード（ビルド・パッケージングツール等）:** [MIT License](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
+
+MIT Licenseは、このリポジトリで独自に作成したコード・ツールへ適用し、再利用・改変しやすい形で公開するために採用しています。生成されるSarackフォントには適用せず、上流フォントソフトウェアをMITへ再ライセンスするものではありません。
 
 Sarasa Gothic / Source Han Sans、Hack / Bitstream Vera などの上流ライセンス原文は `LICENSES/` に保持しています。
 

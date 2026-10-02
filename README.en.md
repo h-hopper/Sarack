@@ -94,7 +94,9 @@ Sarack primarily uses:
 Licensing is separated by component:
 
 - **Generated Sarack fonts:** [SIL Open Font License 1.1](LICENSE-FONT)
-- **Project-authored build tooling:** [MIT License](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
+- **Repository-authored code (including build and packaging tools):** [MIT License](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
+
+The MIT License applies to code and tooling authored in this repository and is adopted to make that code easy to reuse and modify. It does not apply to generated Sarack fonts or relicense upstream font software under MIT.
 
 Verbatim upstream license texts for Sarasa Gothic / Source Han Sans and Hack / Bitstream Vera are retained under `LICENSES/`.
 
