@@ -35,15 +35,39 @@ TERM_FILES = (
     "SarackTermHS-BoldItalic.ttf",
 )
 
-COMMON_FILES = (
+LICENSE_SOURCES = (
     Path("LICENSE-FONT"),
-    Path("THIRD_PARTY_NOTICES.md"),
-    Path("ACKNOWLEDGEMENTS.md"),
-    Path("README.md"),
-    Path("README.en.md"),
     Path("LICENSES/Sarasa-Gothic-OFL.txt"),
     Path("LICENSES/Hack-LICENSE.md"),
 )
+
+LICENSE_HEADINGS = (
+    "Sarack Font License",
+    "Sarasa Gothic / Source Han Sans notices",
+    "Hack / Bitstream Vera notices",
+)
+
+
+def license_bundle(repo_root: Path) -> bytes:
+    """Join complete license sources, normalizing line endings only."""
+    sections = []
+    for heading, relative in zip(LICENSE_HEADINGS, LICENSE_SOURCES, strict=True):
+        text = (repo_root / relative).read_bytes().decode("utf-8")
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
+        sections.append(f"{'=' * 50}\n{heading}\n{'=' * 50}\n\n{text}\n")
+    data = "\n".join(sections).encode("utf-8")
+    for notice in (
+        b"SIL OPEN FONT LICENSE Version 1.1",
+        b"Copyright (c) 2015-2025, Renzhi Li",
+        b"Adobe Systems Incorporated",
+        b"Reserved Font Name 'Source'",
+        b"Copyright 2018 Source Foundry Authors",
+        b"MIT License",
+        b"Bitstream Vera License",
+    ):
+        if notice not in data:
+            raise RuntimeError(f"Required license notice missing: {notice!r}")
+    return data
 
 EXPECTED_FONT_PROPERTIES = {
     "SarackMono-": ("Sarack Mono", 1000),
@@ -164,27 +188,40 @@ def require_inputs(directory: Path, filenames: tuple[str, ...], version: str) ->
     return result
 
 
-def add_file(zf: zipfile.ZipFile, source: Path, archive_name: str) -> None:
+def add_file(zf: zipfile.ZipFile, data: bytes, archive_name: str) -> None:
     info = zipfile.ZipInfo(archive_name, ZIP_TIMESTAMP)
     info.compress_type = zipfile.ZIP_DEFLATED
     info.external_attr = 0o644 << 16
-    zf.writestr(info, source.read_bytes())
+    zf.writestr(info, data)
 
 
 def write_archive(
     archive_path: Path,
     root_name: str,
     fonts: list[Path],
-    repo_root: Path,
+    licenses: bytes,
 ) -> None:
     with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         for font in sorted(fonts, key=lambda p: p.name):
-            add_file(zf, font, f"{root_name}/{font.name}")
-        for relative in COMMON_FILES:
-            source = repo_root / relative
-            if not source.is_file():
-                raise FileNotFoundError(source)
-            add_file(zf, source, f"{root_name}/{relative.as_posix()}")
+            add_file(zf, font.read_bytes(), f"{root_name}/{font.name}")
+        add_file(zf, licenses, f"{root_name}/LICENSES.txt")
+
+
+def validate_archive(
+    archive_path: Path, root_name: str, filenames: tuple[str, ...], licenses: bytes
+) -> None:
+    expected = [f"{root_name}/{name}" for name in sorted(filenames)]
+    expected.append(f"{root_name}/LICENSES.txt")
+    with zipfile.ZipFile(archive_path) as archive:
+        if archive.namelist() != expected:
+            raise RuntimeError(f"Unexpected release entries/order: {archive_path.name}")
+        if any(entry.date_time != ZIP_TIMESTAMP for entry in archive.infolist()):
+            raise RuntimeError(f"Unexpected ZIP timestamp: {archive_path.name}")
+        if archive.testzip() is not None:
+            raise RuntimeError(f"ZIP CRC failure: {archive_path.name}")
+        if archive.read(f"{root_name}/LICENSES.txt") != licenses:
+            raise RuntimeError(f"License bundle mismatch: {archive_path.name}")
+    print(f"Verified {archive_path.name}: 8 TTF + LICENSES.txt; no extra files")
 
 
 def sha256(path: Path) -> str:
@@ -204,17 +241,26 @@ def main() -> None:
     mono = require_inputs(args.mono_dir.resolve(), MONO_FILES, args.version)
     term = require_inputs(args.term_dir.resolve(), TERM_FILES, args.version)
 
+    licenses = license_bundle(repo_root)
     targets = (
-        ("Mono", mono),
-        ("Term", term),
+        ("Mono", mono, MONO_FILES),
+        ("Term", term, TERM_FILES),
     )
     archives = []
-    for variant, fonts in targets:
+    for variant, fonts, filenames in targets:
         root_name = f"Sarack-{variant}-v{args.version}"
         archive_path = output_dir / f"{root_name}.zip"
-        write_archive(archive_path, root_name, fonts, repo_root)
+        write_archive(archive_path, root_name, fonts, licenses)
+        validate_archive(archive_path, root_name, filenames, licenses)
         archives.append(archive_path)
         print(f"Created {archive_path}")
+
+    with zipfile.ZipFile(archives[0]) as mono_zip, zipfile.ZipFile(archives[1]) as term_zip:
+        if mono_zip.read(f"Sarack-Mono-v{args.version}/LICENSES.txt") != term_zip.read(
+            f"Sarack-Term-v{args.version}/LICENSES.txt"
+        ):
+            raise RuntimeError("Mono/Term license bundles differ")
+    print("Mono/Term LICENSES.txt: byte-identical")
 
     checksums = output_dir / "SHA256SUMS.txt"
     checksums.write_text(
