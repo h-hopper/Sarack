@@ -19,7 +19,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 
 DEFAULT_MONO_FAMILY = "Sarack Mono"
-DEFAULT_VERSION = "0.1.1-dev"
+DEFAULT_VERSION = "0.2.0-dev"
 LICENSE_DESCRIPTION = "This Font Software is licensed under the SIL Open Font License, Version 1.1."
 LICENSE_URL = "https://openfontlicense.org"
 SARACK_COPYRIGHT = "Sarack modifications Copyright (c) 2026 h-hopper."

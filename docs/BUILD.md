@@ -85,10 +85,10 @@ python build.py \
   --output out/SarackTermHS-Regular.ttf
 ```
 
-開発版の既定versionは `0.1.1-dev` です。別versionを生成する場合は `--version` を明示します。
+開発版の既定versionは `0.2.0-dev` です。別versionを生成する場合は `--version` を明示します。
 
 ```bash
-python build.py ... --version 0.1.1-dev
+python build.py ... --version 0.2.0-dev
 ```
 
 ## ビルダーが行う処理
