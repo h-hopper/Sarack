@@ -85,10 +85,10 @@ python build.py \
   --output out/SarackTermHS-Regular.ttf
 ```
 
-開発版の既定versionは `0.1.0-dev` です。別versionを生成する場合は `--version` を明示します。
+開発版の既定versionは `0.1.1-dev` です。別versionを生成する場合は `--version` を明示します。
 
 ```bash
-python build.py ... --version 0.1.0-dev
+python build.py ... --version 0.1.1-dev
 ```
 
 ## ビルダーが行う処理
@@ -132,7 +132,7 @@ CIでは次を実行します。
 - `Sarack Term` / `Sarack Term HS` を各4スタイル生成
 - 16 TTFすべてについてbuilder内部のwidth / U+3000 / style / metadata検証を実行
 - Mono / TermのU+2014 EM DASHがそれぞれ全角 / 半角であることを検証
-- Mono / Termを別々のdevelopment artifactとしてアップロード
+- workflow_dispatch時だけMono / Termを別々のdevelopment artifactとしてアップロード（retention 3日）。PRではuploadせず、superseded PR runをcancelする
 
 GitHub Actions自体も特定commit SHAへ固定します。versionコメントは可読性のためworkflow内に併記します。
 
@@ -173,35 +173,23 @@ sarack-term-dev
 
 ## Release package
 
-正式配布候補は `.github/workflows/release-package.yml` で生成します。通常の開発用 `build.yml` と分離し、Release候補では `--version` を明示して16 TTFを再生成します。初回候補versionは `0.1.0` です。
+正式配布候補は `.github/workflows/release-package.yml` で生成します。`workflow_dispatch` の `version` に `X.Y.Z` を明示し、Release用versionで16 TTFを再生成します。PRでも同じbuild / validationを実施しますが、artifactはuploadしません。
 
-Release workflowはPull Requestで検証できるほか、`workflow_dispatch` ではversionを明示して手動生成できます。上流入力の取得・SHA-256検証、16 TTFのbuilder内部検証、Mono / TermのU+2014幅検証を実施した後、`package_release.py` で配布ZIPを作成します。
-
-初回Release候補の出力:
+Release候補の出力:
 
 ```text
-Sarack-Mono-v0.1.0.zip
-Sarack-Term-v0.1.0.zip
+Sarack-Mono-vX.Y.Z.zip
+Sarack-Term-vX.Y.Z.zip
 SHA256SUMS.txt
 ```
 
-Mono ZIPには `Sarack Mono` / `Sarack Mono HS` の8 TTF、Term ZIPには `Sarack Term` / `Sarack Term HS` の8 TTFを収録します。各ZIPにはさらに次を同梱します。
+Mono ZIPはMono / Mono HS各4 styles、Term ZIPはTerm / Term HS各4 stylesの**8 TTFとLICENSES.txtのみ**を収録します。variant/version名の単一root directoryとし、README・ACKNOWLEDGEMENTS・独立THIRD_PARTY_NOTICES・LICENSES directoryは入れません。
 
-```text
-LICENSE-FONT
-THIRD_PARTY_NOTICES.md
-ACKNOWLEDGEMENTS.md
-README.md
-README.en.md
-LICENSES/Sarasa-Gothic-OFL.txt
-LICENSES/Hack-LICENSE.md
-```
+`LICENSES.txt` は `LICENSE-FONT`、`LICENSES/Sarasa-Gothic-OFL.txt`、`LICENSES/Hack-LICENSE.md` の全文をseparator付きで連結します。改行のみ正規化し、必要な権利表示・license本文を維持します。両ZIPのLICENSES.txtはbyte-identicalです。独自source / toolingを同梱しないので、`LICENSE-CODE` はsource repoにのみ保持します。
 
-Binary packageにはproject-authored source/build toolingを同梱しないため、`LICENSE-CODE` はZIP内の必須ファイルにはしません。source repository側では `LICENSE-CODE` を保持します。
+`package_release.py` は全16 TTFのfamily / Release version / OFL metadata / 500・1000幅 / U+3000 / Mono・Term U+2014 / Unhintedを再検証します。ZIPの正確な9ファイル、license text、CRC、固定timestampとentry順も検証します。SHA256SUMSには2 ZIPのSHA-256を記録し、workflow内で再照合します。
 
-`package_release.py` は入力TTFのfamily、Release version、OFL metadataを再確認し、固定timestampと固定されたentry順でZIPを生成します。`SHA256SUMS.txt` には2つの配布ZIPのSHA-256を記録し、workflow内で再検証します。
-
-Release候補を実際に配布する前には、生成artifactを展開してTTF metadata、U+3000、Mono / Term spacing、Unhinted状態、ライセンス同梱内容を実ファイルでも最終確認します。
+候補を公開する前には、artifact実物のTTF・package構成・license全文とSHAを監査します。Actions development artifactは正式Releaseとは別です。
 
 ## 上流更新
 

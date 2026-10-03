@@ -6,7 +6,7 @@ on:
       version:
         description: Release version without v prefix
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
   pull_request:
     paths:
       - "build.py"
@@ -19,13 +19,15 @@ on:
       - "THIRD_PARTY_NOTICES.md"
       - "README.md"
       - "README.en.md"
+      - "docs/**"
+      - "tests/**"
       - ".github/workflows/release-package.yml"
 
 permissions:
   contents: read
 
 env:
-  SARACK_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.0' }}
+  SARACK_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.1.1' }}
 
 concurrency:
   group: release-package-${{ github.workflow }}-${{ github.ref }}
@@ -55,6 +57,9 @@ jobs:
 
       - name: Validate Python sources
         run: python -m py_compile build.py package_release.py
+
+      - name: Validate package licenses and documentation
+        run: python -m unittest discover -s tests -v
 
       - name: Fetch and verify pinned upstream font inputs
         shell: bash
@@ -192,6 +197,9 @@ jobs:
           test -f "Sarack-Term-v${SARACK_VERSION}.zip"
           test "$(unzip -Z1 "Sarack-Mono-v${SARACK_VERSION}.zip" | grep -c '\.ttf$')" -eq 8
           test "$(unzip -Z1 "Sarack-Term-v${SARACK_VERSION}.zip" | grep -c '\.ttf$')" -eq 8
+          # package_release.py verifies exact entries, license text, CRC and timestamps.
+          test "$(unzip -Z1 "Sarack-Mono-v${SARACK_VERSION}.zip" | wc -l)" -eq 9
+          test "$(unzip -Z1 "Sarack-Term-v${SARACK_VERSION}.zip" | wc -l)" -eq 9
           unzip -Z1 "Sarack-Mono-v${SARACK_VERSION}.zip"
           unzip -Z1 "Sarack-Term-v${SARACK_VERSION}.zip"
 

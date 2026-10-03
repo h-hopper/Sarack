@@ -1,14 +1,11 @@
 # 紗絡（Sarack）
 
 **紗絡（Sarack）** は、Sarasa Gothic と Hack をベースにした、日本語対応のプログラミング／ターミナル向け等幅フォントです。  
-**Sarack** is a Japanese-capable monospace font for programming and terminal use, based on Sarasa Gothic and Hack.
 
 [English](README.en.md)
 
 [![Build](https://github.com/h-hopper/Sarack/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/h-hopper/Sarack/actions/workflows/build.yml)
-<!-- 初回 GitHub Release 公開後に有効化
 [![Latest Release](https://img.shields.io/github/v/release/h-hopper/Sarack)](https://github.com/h-hopper/Sarack/releases)
--->
 [![Font License: OFL-1.1](https://img.shields.io/badge/font%20license-OFL--1.1-blue.svg)](LICENSE-FONT)
 [![Code License: MIT](https://img.shields.io/badge/code%20license-MIT-blue.svg)](https://github.com/h-hopper/Sarack/blob/main/LICENSE-CODE)
 
@@ -27,6 +24,14 @@
 - **独立ビルド:** Sarasa Gothic のforkやソースツリーに依存せず再生成可能
 
 具体的な拡大率、記号補正値、OpenType feature の扱いなどは [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) に分離しています。
+
+## 表示見本
+
+Sarack v0.1.1の実TTFをレンダリングした見本です。
+
+![紗絡の日本語・Latin・コード・4スタイルの表示見本](docs/images/sarack-specimen.png)
+
+![Mono・Term・Hidden Spaceの文字幅と全角スペースの比較](docs/images/sarack-variants.png)
 
 ## バリアント
 
@@ -49,15 +54,15 @@
 
 ## 入手
 
-配布物の入手先は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) です。`v0.1.0` は初回正式Releaseで、4ファミリー × 4スタイル、計16本の **Unhinted TTF** を収録します。
+最新版は [GitHub Releases](https://github.com/h-hopper/Sarack/releases) から入手できます。4ファミリー × 4スタイル、計16本の **Unhinted TTF** を、用途別の2つのZIPで配布します。
 
-- `Sarack-Mono-v0.1.0.zip` — Mono / Mono HS 各4スタイル（8 TTF）
-- `Sarack-Term-v0.1.0.zip` — Term / Term HS 各4スタイル（8 TTF）
+- `Sarack-Mono-vX.Y.Z.zip` — Mono / Mono HS 各4スタイル（8 TTF）
+- `Sarack-Term-vX.Y.Z.zip` — Term / Term HS 各4スタイル（8 TTF）
 - `SHA256SUMS.txt` — 2つのZIPのSHA-256
 
 公開されたZIPを展開し、使用するファミリーのTTFをOSへインストールして、アプリのフォント設定で選択してください。各ファミリーには Regular / Bold / Italic / Bold Italic が含まれます。
 
-GitHub Actionsの開発用artifact（`0.1.0-dev`）は配布用Release packageと区別してください。
+各ZIPは8本のTTFと、必要なライセンス全文をまとめた `LICENSES.txt` を含みます。
 
 ## ビルド
 
@@ -69,7 +74,7 @@ GitHub Actionsの開発用artifact（`0.1.0-dev`）は配布用Release package�
 - **Sarasa Term J 1.0.41 Unhinted TTF** — Term版の日本語/CJK字形、基本メトリクス、OpenType table のベース
 - **Hack 3.003** — Basic Latin 字形
 
-`v0.1.0` の配布TTFは **Unhinted** です。Regularで `ttfautohint 1.8.4` を用いたA/B評価では、12～13 pxで僅かな改善は見られたものの14 px以上では差が小さく、配布サイズ増加との釣り合いから採用を見送りました。評価結果と判断理由は [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) に記録しています。
+配布TTFは **Unhinted** です。Regularで `ttfautohint 1.8.4` を用いたA/B評価では、12～13 pxで僅かな改善は見られたものの14 px以上では差が小さく、配布サイズ増加との釣り合いから採用を見送りました。評価結果と判断理由は [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) に記録しています。
 
 標準Mono版は既定動作で `Sarack Mono` を生成し、`--hidden-space` を指定すると `Sarack Mono HS` を生成します。Term版はSarasa Term Jをbaseにし、family名を `Sarack Term` / `Sarack Term HS` として生成します。ローカルでの再生成手順、対応スタイル、GitHub Actions の動作は [ビルド手順](https://github.com/h-hopper/Sarack/blob/main/docs/BUILD.md) を参照してください。
 
@@ -77,7 +82,7 @@ GitHub Actionsの開発用artifact（`0.1.0-dev`）は配布用Release package�
 
 - [設計仕様](https://github.com/h-hopper/Sarack/blob/main/docs/DESIGN.md) — 字形構成、具体的な補正値、設計方針
 - [ビルド手順](https://github.com/h-hopper/Sarack/blob/main/docs/BUILD.md) — 再現ビルド、入力バージョン、CI
-- [公開・Releaseチェックリスト](https://github.com/h-hopper/Sarack/blob/main/docs/RELEASE.md) — Public化・配布前の確認事項
+- [Releaseチェックリスト](https://github.com/h-hopper/Sarack/blob/main/docs/RELEASE.md) — Release前後の確認事項
 - [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md) — 上流プロジェクトとengineering referenceの由来
 - [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — 第三者ライセンス・配布時通知
 
@@ -109,5 +114,4 @@ Sarack は **OpenAIのChatGPTによる大幅な開発支援**を受けていま�
 
 ## 今後の予定
 
-- 必要性が確認できた場合のみ Nerd Font variant を検討
-- 利用環境に応じた表示例・スクリーンショットの充実
+- Nerd Fonts variantの追加を必要性を確認しながら検討

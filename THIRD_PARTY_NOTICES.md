@@ -2,7 +2,7 @@
 
 Sarack is built from open-source font software. The generated font files are intended to be distributed under the SIL Open Font License 1.1, while preserving all applicable upstream copyright and license notices.
 
-This file records provenance and distribution notices. Verbatim upstream license texts are retained in `LICENSES/` and included in each binary release package.
+This file records provenance and distribution notices. Verbatim upstream license texts are retained in `LICENSES/` and combined, without abridgement, in `LICENSES.txt` in each binary release package.
 
 ## Sarasa Gothic / Sarasa Mono J / Sarasa Term J
 
@@ -53,13 +53,10 @@ Because HackGen is an engineering/provenance reference rather than a distributed
 
 ## Release checklist
 
-Before publishing a GitHub Release containing TTF files, verify that the archive contains at least:
+Binary release packages contain eight TTFs and one `LICENSES.txt`. The package builder combines the complete texts of `LICENSE-FONT`, `LICENSES/Sarasa-Gothic-OFL.txt`, and `LICENSES/Hack-LICENSE.md` with clear section headings, normalizing line endings only. This preserves the Sarasa Gothic / Source Han Sans OFL notices and all Hack / Bitstream Vera notices.
 
-- `LICENSE-FONT` — SIL Open Font License 1.1 for Sarack font software
-- `LICENSE-CODE` — MIT License for project-authored build tooling when source is distributed with the package
-- a verbatim Sarasa Gothic license/copyright file
-- a verbatim Hack `LICENSE.md`, including Bitstream Vera terms
-- `THIRD_PARTY_NOTICES.md`
-- `ACKNOWLEDGEMENTS.md`
+`LICENSES.txt` is byte-identical in the Mono and Term packages. README files, this notice document, and `ACKNOWLEDGEMENTS.md` remain in the repository rather than being copied into the ZIPs. HackGen is an engineering reference, not a distributed binary dependency.
 
-Also verify the font `name` table copyright/license metadata and Reserved Font Name constraints before every binary release, including pre-releases.
+Project-authored source and build/packaging tooling remain under `LICENSE-CODE` (MIT) in the repository and are not included in binary-only ZIPs. Generated fonts remain under `LICENSE-FONT` (OFL 1.1); upstream fonts are not relicensed under MIT.
+
+Verify the font `name` table copyright/license metadata and Reserved Font Name constraints before every binary release, including pre-releases.

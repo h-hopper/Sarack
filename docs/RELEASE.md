@@ -1,217 +1,119 @@
-# 紗絡 / Sarack 公開・Release チェックリスト
+# 紗絡 / Sarack Releaseチェックリスト
 
-この文書は、Sarack の公開用treeとGitHub Release配布物の確認事項をまとめます。公開先は `h-hopper/Sarack`、初回公開versionは `v0.1.0` です。公開前Release gateをすべて通過した後、正式な通常GitHub Releaseとして公開します。
+公開先は `h-hopper/Sarack`。Releaseごとに、その対象commitから候補を生成し、CIと実物監査を通過してから公開する。日本語READMEを主文書とし、英語READMEは利用者向けの簡潔な案内とする。
 
-## 1. 名称・metadata
+## 1. Versionと公開方針
 
-- family 名が `Sarack Mono` / `Sarack Mono HS` / `Sarack Term` / `Sarack Term HS` で意図どおり分離されている
-- 日本語ブランド表記 `紗絡` は README / 紹介文で使用し、font family metadata は英字名に統一する
-- Regular / Bold / Italic / Bold Italic の style linking が正常
-- weight 400 / 700 が正しい
-- Italic / Bold bits が正しい
-- PostScript name が一貫している
-- Reserved Font Name に抵触する primary family name を使用していない
-- name ID 0 に Sarack の改変著作権表示と必要な上流権利表示が保持されている
-- name ID 3（Unique font identifier）が family / style / version ごとに衝突しない
-- name ID 5（Version string）が Release version と一致する
-- name ID 13 / 14 に OFL 1.1 の license description / URL が設定されている
-- `head.fontRevision` が Release version 方針と一致する
-- 開発版の `0.1.0-dev` をそのままReleaseへ持ち込まない
+- 正式版 `vX.Y.Z` は通常のGitHub Releaseとし、Draft / Pre-releaseはOFF
+- `v0.x` であること自体はPre-releaseと同義ではない
+- 外部検証が必要なRC / betaは `vX.Y.Z-rc.1` 等の別tagでPre-releaseとして公開可能
+- 正式版は別tagで作成し、同じtagをPre-releaseから通常Releaseへ昇格させる運用は原則行わない
+- 開発版の `-dev` を正式Releaseへ混入させない
+- 公開済みtagを移動せず、公開assetを差し替えない。修正は新versionとして公開する
 
-## 2. ビルド
+## 2. Build・source lock
 
-- `main` の GitHub Actions が成功する
-- `Sarack Mono` / `Sarack Mono HS` / `Sarack Term` / `Sarack Term HS` をそれぞれ4スタイル、合計16 TTF生成できる
-- 500 / 1000 の 1:2 を CI / 実TTFで確認する
-- 標準版の U+3000 が可視、HS版の U+3000 が不可視である
-- Mono / Term のU+2014 EM DASHがそれぞれ全角 / 半角である
-- `sources.lock` に `PENDING` 等の未確定値が残っていない
-- Sarasa archive と Hack 4 TTF の SHA-256 が `sources.lock` と一致する
-- Hack は固定commitから取得する
-- `requirements.txt` の依存versionを固定する
-- GitHub Actions依存を特定commit SHAへ固定し、workflow内コメントで対応versionを確認できる
-- README / docs の上流version表記が `sources.lock` と一致する
-- 正式配布候補は `.github/workflows/release-package.yml` からRelease versionを明示して生成する
+- Release対象commitとmain、候補runのhead SHAを記録する
+- `.github/workflows/release-package.yml` を対象commitのmainから実行し、`version` に `X.Y.Z` を明示する
+- 固定されたSarasa / Hack入力とSHA-256が `sources.lock` に一致
+- `PENDING` 等の未確定値なし、Hack取得元は固定commit
+- README / docsの上流versionとsource lockが一致
+- Python依存versionとActionsのcommit SHA固定を維持
+- Mono / Mono HS / Term / Term HSを各4スタイル、計16 TTF生成
+- PRではbuild / validationを維持し、artifact uploadは行わない
+- dispatch時だけartifact upload、retentionは3日。正式候補は開発artifactと区別する
 
-## 3. 実表示
+## 3. Font metadata・自動検証
 
-少なくとも次の環境で実表示を確認する。
+全16 TTFについて次を確認する。
 
-- VS Code editor
-- VS Code integrated terminal
-- Windows Terminal
-- PowerShell 7 / SSH
-- PuTTY
+- familyが `Sarack Mono` / `Sarack Mono HS` / `Sarack Term` / `Sarack Term HS` に分離
+- Regular / Bold / Italic / Bold Italicのstyle linkingが正常
+- weight 400 / 700、Bold / Italic bitsが正しい
+- PostScript nameが一貫し、name ID 3がfamily / style / versionごとに衝突しない
+- name ID 5がRelease version、`head.fontRevision` がversion方針に一致
+- name ID 0にSarack改変著作権と必要な上流権利表示を保持
+- name ID 13 / 14はOFL 1.1のdescription / URL
+- Reserved Font Nameに抵触するprimary family nameを使わない
+- Basic Latinは500、日本語/CJKは1000、半角:全角=1:2
+- U+3000は1000幅、標準版は可視、HSは不可視・輪郭なし
+- U+2014はMono / Mono HS=1000、Term / Term HS=500（全styles）
+- Unhinted: `cvt ` / `fpgm` / `prep` が存在しない
+- 保存後に再openしたTTFでもbuilder validationを通過
 
-確認対象:
+現行配布はUnhinted。Regularの `ttfautohint 1.8.4` A/B評価では12～13 pxの改善が小さく、14 px以上の差とサイズ増加を考慮して不採用とした。再検討時はgeometry / spacing / metadataを維持し、Windowsで12～16 px程度の表示を再確認する。
 
-- `0 O o Q`
-- `1 I l |`
-- 引用符 `" ' \``
-- `. , : ;`
-- 日本語 + Latin 混在
-- U+3000 全角スペース
-- Regular / Bold / Italic / Bold Italic
-- 半角 / 全角の桁揃え
-- `Sarack Mono` と `Sarack Mono HS` の同時インストール時に family が衝突しないこと
-- `Sarack Term` と `Sarack Term HS` の同時インストール時に family が衝突しないこと
-- Mono / Termで矢印・幾何学記号・ダッシュ等のspacing差が意図どおり表示されること
+## 4. 実表示
 
-## 4. Hinting
+VS Code editor / integrated terminal、Windows Terminal、PowerShell 7 / SSH、PuTTYで確認する。
 
-- 初回 public release は **Unhinted** とする
-- `ttfautohint 1.8.4` によるRegular A/B評価では、12～13 pxで僅かな改善はあったが14 px以上では差が小さく、配布サイズ増加との釣り合いから正式採用しない
-- Release TTFに意図せず `cvt ` / `fpgm` / `prep` 等の自動Hinting tableを追加していないことを確認する
-- 将来Hintingを再検討する場合は、advance width・outline geometry・U+3000・metadata・Mono/Term spacing semanticsを維持し、12～16 px程度のWindows表示を再確認する
+- `0 O o Q` / `1 I l |` / 引用符 / 句読点
+- 日本語とLatin混在、半角・全角の桁揃え、U+3000
+- 全4 stylesとMono / Termの矢印・幾何学記号・ダッシュのspacing差
+- 同時インストール時の4 family分離とstyle linking
+- PuTTYのTerm設定は `UTF-8`（`UTF-8 (CJK)` ではない）
+- README見本画像は実Sarack TTFからレンダリングし、clipping / tofuを確認
 
-## 5. ライセンス・第三者通知
+## 5. License・package
 
-`LICENSE-CODE` は、このリポジトリで独自に作成したコード・ツール（ビルド・パッケージングツール等）に適用するMIT Licenseである。`LICENSE-FONT` は、生成されるSarackフォントに適用するSIL Open Font License 1.1である。MITは生成フォントには適用せず、上流フォントソフトウェアをMITへ再ライセンスするものではない。
+`LICENSE-CODE` はrepository独自コード / build・package toolingのMIT License、`LICENSE-FONT` は生成SarackフォントのSIL OFL 1.1。MITは生成fontには適用せず、上流fontをMITへ再ライセンスするものではない。
 
-Release archive に少なくとも次を含める。
+各binary ZIPはvariant/versionの単一rootと、次の**9ファイルのみ**を持つ。
 
-- `LICENSE-FONT`
-- `LICENSE-CODE`（source / build tooling を同梱する場合）
-- `LICENSES/Sarasa-Gothic-OFL.txt`
-- `LICENSES/Hack-LICENSE.md`
-- `THIRD_PARTY_NOTICES.md`
-- `ACKNOWLEDGEMENTS.md`
+- Mono: Mono / Mono HS × 4 stylesの8 TTF
+- Term: Term / Term HS × 4 stylesの8 TTF
+- 共通: `LICENSES.txt` 1本
 
-Binary-onlyのMono / Term配布ZIPにはproject-authored source/build toolingを含めないため、`LICENSE-CODE` はZIP内の必須ファイルにはしない。source repositoryには保持する。
+`package_release.py` は次の正本全文を、見出しとseparator付きで連結する。改行のみ決定的に正規化し、本文を要約・改変しない。
 
-さらに次を確認する。
+1. `LICENSE-FONT`
+2. `LICENSES/Sarasa-Gothic-OFL.txt`
+3. `LICENSES/Hack-LICENSE.md`
 
-- Sarasa Gothic / Source Han Sans の著作権表示を保持
-- Hack / Bitstream Vera の通知を保持
-- HackGen は engineering reference としての位置づけが正しく記載されている
-- AI支援開発の記載が upstream の権利表示と混同されていない
-- TTF `name` table の copyright / license metadata と配布ファイルの内容が矛盾しない
+確認事項:
 
-## 6. README / ドキュメント
+- Mono / Termの `LICENSES.txt` はbyte-identical
+- OFL全文、Sarasa著作権、Adobe / Sourceのnotice、Hack著作権、MIT、Bitstream Vera本文が欠落しない
+- ZIPにはREADME、ACKNOWLEDGEMENTS、独立THIRD_PARTY_NOTICES、LICENSES directory、source / tooling / cacheを入れない
+- `LICENSE-CODE` はsource repoに保持し、binary-only ZIPには不要
+- HackGenはengineering referenceでありbinary dependencyではない。repoのACKNOWLEDGEMENTS / THIRD_PARTY_NOTICESで由来を保持
+- TTFの権利表示・license metadataとlicense bundleが矛盾しない
+- ZIP内の重複、余計なentry、複数rootなし。固定timestamp / entry順とCRCが正常
 
-- `README.md` は日本語メインで、冒頭に `紗絡（Sarack）` と日英の短い概要を示す
-- `README.en.md` への導線がある
-- README は特徴・利用方法中心で、具体的な補正値を過剰に載せない
-- `Mono` / `Term` がspacing variantであり、`Term` がNerd Fontを意味しないことが分かる
-- 標準版が U+3000 可視、`HS` が Hidden Space であることが分かる
-- 具体的な設計値は `docs/DESIGN.md`
-- 再現ビルド手順は `docs/BUILD.md`
-- Release 手順は本書 `docs/RELEASE.md`
-- 公開先repositoryのURL・badge・Release linkが最終repository名と一致している
-- Release ZIPにREADMEを同梱するため、最終repository URLへ切り替えた後に正式配布候補を再生成する
-- スクリーンショットが実際の Release TTF で生成されている
+## 6. Candidate実物監査
 
-## 7. バッジ
-
-公開時の README badge は情報性の高いものだけにする。
-
-推奨:
-
-- Build status
-- Font License: OFL-1.1
-- Code License: MIT
-
-初回正式Release後:
-
-- README 冒頭にコメントアウト済みの `Latest Release` badge を有効化する
-- badgeは通常Releaseのみを表示し、Pre-releaseは表示対象に含めない。リンク先は `https://github.com/h-hopper/Sarack/releases` とする
-
-原則として追加しない:
-
-- 対応OS・エディタを大量に並べる装飾 badge
-- upstream version を badge 化したもの
-
-## 8. 公開repositoryへの移行
-
-公開先の `h-hopper/Sarack` は、旧Private開発repositoryとは独立した新repositoryである。初期importでは、監査済みbaselineを独立したroot commitとして作成済みであり、旧 `Sarack-Code` のcommit ancestry・PR・branch・Actions履歴は移行していない。
-
-初期baseline後の公開準備変更は、通常のreviewed PR / commitとして積み上げてよい。Public化時点で複数commitが存在してよく、history rewriteで1 commitへ戻す必要はない。目的は旧repositoryとの履歴分離であり、Public化まで単一commitを維持することではない。
-
-公開用treeの準備と、repository作成・初期commit投入・Public化・tag / Release公開は別工程として扱う。tree準備だけでは後者を実行しない。旧repositoryのarchive・削除も別途判断する。
-
-Public化前には以下を確認する。
-
-- 移植するtracked treeにsecret / token / 不要な個人情報・ローカルパス・生成物が含まれていない
-- 初期importで旧repositoryの `.git` をコピーせず、baselineが独立したroot commitとして作成されている
-- baseline後の公開準備変更がreview済みの通常commitとして記録され、旧repositoryのcommit ancestryが混入していない
-- README / license / workflow がPublic前提で読める
-- repository名・README内URL・badge・Release導線が最終公開先と一致する
-- Public化前はrepositoryがPrivateであるため、README内リンクやBuild badgeの外部表示はPublic化後に確認する。workflow自体はrepository名に依存しない
-- GitHub Secrets・Actions設定・権限・branch protectionはtreeと別に確認する。旧repositoryの設定が自動移行するとは扱わない
-- 新repositoryで `build.yml` と `release-package.yml`（version `0.1.0`）を実行し、CIと生成artifactを確認してからPublic化する
-
-## 9. GitHub Release
-
-初回公開versionは **`v0.1.0`** とし、GitHub Release上では正式な **通常Release** として公開する。Pre-release設定は **OFF** とする。
-
-Pre-releaseは、将来、外部検証が必要なRC / beta等に限定して使用する（例: `v0.2.0-rc.1`）。RC / beta等をPre-releaseとして公開した場合、正式版は別tag（例: `v0.2.0`）として作成し、同一tagをPre-releaseから通常Releaseへ昇格させる運用は原則行わない。`v0.x` であること自体はGitHub Pre-releaseと同義ではない。
-
-正式配布候補は `.github/workflows/release-package.yml` で `0.1.0` を指定して生成し、Release assetは次を基本構成とする。
+正式候補artifactの内側の3ファイルを取得する。
 
 ```text
-Sarack-Mono-v0.1.0.zip
-Sarack-Term-v0.1.0.zip
+Sarack-Mono-vX.Y.Z.zip
+Sarack-Term-vX.Y.Z.zip
 SHA256SUMS.txt
 ```
 
-Mono版 Release archive:
+- 2 ZIPのSHA-256を独立再計算し、SHA256SUMSと一致
+- 各ZIPが8 TTF + LICENSES.txtのみであることを実物から確認
+- LICENSES.txtを正本全文と照合
+- 全16 TTFのmetadata / width / U+3000 / U+2014 / Unhintedを確認
+- 設計変更なしのReleaseでは前versionとglyph / cmap / metrics / OpenType tablesを比較
+- artifact ID、run ID、対象SHA、hash、失効時刻を記録。再buildした別物に置き換えない
 
-```text
-SarackMono-Regular.ttf
-SarackMono-Bold.ttf
-SarackMono-Italic.ttf
-SarackMono-BoldItalic.ttf
-SarackMonoHS-Regular.ttf
-SarackMonoHS-Bold.ttf
-SarackMonoHS-Italic.ttf
-SarackMonoHS-BoldItalic.ttf
-LICENSE-FONT
-THIRD_PARTY_NOTICES.md
-ACKNOWLEDGEMENTS.md
-README.md
-README.en.md
-LICENSES/Sarasa-Gothic-OFL.txt
-LICENSES/Hack-LICENSE.md
-```
+## 7. 公開
 
-Term版 Release archive:
+- 公開前にrepoがPublic、default branch=main、対象SHA・tag未存在を確認
+- PR経由の変更とmain保護、Actions read権限、fork PR設定を維持
+- target commitに新tagを作成し、正式ReleaseのDraft / Pre-releaseをOFFにする
+- 日本語主体のRelease notesに変更内容・配布物・font licenseを記載
+- 添付は2 ZIPとSHA256SUMSの正確に3件。Actions artifact外側ZIPやdev artifactは添付しない
+- READMEのLatest Release badgeは通常Releaseを表示し、Release一覧へリンクする
 
-```text
-SarackTerm-Regular.ttf
-SarackTerm-Bold.ttf
-SarackTerm-Italic.ttf
-SarackTerm-BoldItalic.ttf
-SarackTermHS-Regular.ttf
-SarackTermHS-Bold.ttf
-SarackTermHS-Italic.ttf
-SarackTermHS-BoldItalic.ttf
-LICENSE-FONT
-THIRD_PARTY_NOTICES.md
-ACKNOWLEDGEMENTS.md
-README.md
-README.en.md
-LICENSES/Sarasa-Gothic-OFL.txt
-LICENSES/Hack-LICENSE.md
-```
+## 8. 公開後
 
-各ZIPはvariant/version名の単一root directoryを持たせる。`package_release.py` は固定timestampと固定されたentry順でarchiveを生成し、`SHA256SUMS.txt` に2 ZIPのSHA-256を記録する。
+- 未認証のRelease URL / README / badge / images / linksの表示確認
+- 公開Releaseから3assetを再downloadし、SHA256SUMSと期待hashを再照合
+- tag targetとRelease identity、Draft / Pre-release、asset名・件数を確認
+- 新規環境で4 familyのstyle linkingと同時インストールを再確認
+- 次開発versionへの移行はRelease後の別PR。公開tagはRelease commitに固定
 
-Release前の実ファイル監査では少なくとも次を確認する。
+## 公開履歴
 
-- 2 ZIPのSHA-256が `SHA256SUMS.txt` と一致する
-- 各ZIPにTTFが正確に8本含まれる
-- family / style / version / PostScript name / OFL metadataが想定どおりである
-- half/full widthが500/1000である
-- U+3000が1000幅を維持し、標準版は可視・HS版は不可視である
-- Mono / TermのU+2014が1000 / 500である
-- `cvt ` / `fpgm` / `prep` がなく、Unhinted状態を維持している
-- 上流ライセンス原文・第三者通知・READMEが同梱されている
-
-## 10. 公開後
-
-- Public 化後に README badge / links が正常表示されるか確認
-- `Latest Release` badge を有効化する
-- Release archive を実際にダウンロードし、内容を確認
-- `SHA256SUMS.txt` で公開assetを再検証する
-- 新規インストール環境で Mono / Mono HS / Term / Term HS の family linking と同時インストールを再確認
-- 必要なら `CHANGELOG.md` を v0.x の時点から開始する
+`h-hopper/Sarack` は旧Private開発repoと独立したbaselineから開始し、reviewed PRを積み上げて公開した。v0.1.0は初回正式Release。以降も履歴を書き換えず、versionごとに新tag / Releaseを作成する。
